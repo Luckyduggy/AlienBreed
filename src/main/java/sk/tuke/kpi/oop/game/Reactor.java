@@ -31,6 +31,8 @@ public class Reactor extends AbstractActor {
     }
 
     public void increaseTemperature(int increment){
+        if(increment <= 0) return;
+
         double factor = 1.0;
         if(this.damage >= 33 && this.damage <= 66) factor = 1.5;
         if(this.damage > 66) factor = 2;
