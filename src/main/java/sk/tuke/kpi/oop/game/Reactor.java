@@ -14,6 +14,7 @@ public class Reactor extends AbstractActor {
     private final Animation hotAnimation;
     private final Animation brokenAnimation;
     private final Animation offAnimation;
+    private final Animation extinguishedAnimation;
 
     public Reactor() {
         this.temperature = 0;
@@ -24,7 +25,7 @@ public class Reactor extends AbstractActor {
         this.hotAnimation = new Animation("sprites/reactor_hot.png", 80, 80, 0.05f, Animation.PlayMode.LOOP_PINGPONG);
         this.brokenAnimation = new Animation("sprites/reactor_broken.png", 80, 80, 0.1f, Animation.PlayMode.LOOP_PINGPONG);
         this.offAnimation = new Animation("sprites/reactor.png");
-
+        this.extinguishedAnimation = new Animation("sprites/reactor_extinguished.png", 80, 80, 0.1f, Animation.PlayMode.LOOP_PINGPONG);
         updateAnimation();
     }
 
@@ -108,16 +109,23 @@ public class Reactor extends AbstractActor {
             setAnimation(normalAnimation);
         }
     }
-    public void repeirWith(Hammer hammer){
-        if(hammer == null) return;
-        if(this.damage == 0 || this.damage == 100) return;
+    public void repairWith(Hammer hammer) {
+        if (hammer == null || this.damage <= 0 || this.damage >= 100) return;
 
         hammer.use();
+
+        int finalDamage = this.damage - 50;
+
+        int finalTemperature = 2000 + (finalDamage * 40);
+
+        if (finalTemperature < this.temperature) {
+            this.temperature = finalTemperature;
+        }
+
         this.damage -= 50;
-
-        if(this.damage < 0) this.damage = 0;
-
-        this.temperature = 2000 + (this.damage * 40);
+        if (this.damage < 0) {
+            this.damage = 0;
+        }
 
         updateAnimation();
     }
@@ -146,6 +154,17 @@ public class Reactor extends AbstractActor {
         if(this.light == light && light != null){
             this.light.setElectricityFlow(false);
             this.light = null;
+        }
+    }
+
+    public void extinguishWith(FireExtinguisher fireExtinguisher){
+        if (fireExtinguisher == null) return;
+
+        if (this.damage == 100) {
+            fireExtinguisher.use();
+            this.temperature = 4000;
+
+            setAnimation(extinguishedAnimation);
         }
     }
 }
